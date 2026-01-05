@@ -1,14 +1,8 @@
 {
-  "cleanUrls": true,
-  "headers": [
+  "rewrites": [
     {
       "source": "/.well-known/assetlinks.json",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/json"
-        }
-      ]
+      "destination": "/public/.well-known/assetlinks.json"
     }
   ]
 }
