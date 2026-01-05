@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.punishment_roulette.twa",
+        "sha256_cert_fingerprints": ["F3:20:9F:BE:6D:2F:25:F6:94:72:89:67:EB:83:E6:72:9A:26:40:AD:4E:C5:B2:49:AD:54:91:26:99:80:22:21"]
+      }
+    }]
