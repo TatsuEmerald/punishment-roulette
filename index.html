@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punishment Roulette</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-white font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function PunishmentApp() {
+            const defaultPunishments = [
+                "Grounded for a full week from everything you enjoy",
+                "No Electronics for the weekend",
+                "Do your siblings/parents chores for a week",
+                "200 Sentences 'I will/will not.....'",
+                "Stand in corner (time is age x 7mins)",
+                "Miss a special event coming up (such as a school dance)",
+                "No going out for the weekend",
+                "Original punishment x 2",
+                "Original punishment x 3",
+                "Punishment cut in half",
+                "Get Out of Jail Free Card",
+                "Exercise"
+            ];
+
+            const [punishments, setPunishments] = useState([]);
+            const [result, setResult] = useState(null);
+            const [isRolling, setIsRolling] = useState(false);
+            const [inputValue, setInputValue] = useState("");
+
+            // Load and Sync
+            useEffect(() => {
+                const saved = localStorage.getItem('myPunishmentsV2');
+                if (saved) {
+                    setPunishments(JSON.parse(saved));
+                } else {
+                    setPunishments(defaultPunishments);
+                    localStorage.setItem('myPunishmentsV2', JSON.stringify(defaultPunishments));
+                }
+            }, []);
+
+            useEffect(() => {
+                if (punishments.length > 0) {
+                    localStorage.setItem('myPunishmentsV2', JSON.stringify(punishments));
+                }
+            }, [punishments]);
+
+            const resetList = () => {
+                if(confirm("Reset list to defaults? This will add 'Exercise' back if it's missing.")) {
+                    setPunishments(defaultPunishments);
+                }
+            };
+
+            const rollRoulette = () => {
+                if (punishments.length === 0) return;
+                setIsRolling(true);
+                setResult(null);
+                
+                setTimeout(() => {
+                    const random = punishments[Math.floor(Math.random() * punishments.length)];
+                    setResult(random);
+                    setIsRolling(false);
+                }, 1000);
+            };
+
+            const addPunishment = (e) => {
+                e.preventDefault();
+                if (!inputValue.trim()) return;
+                setPunishments([...punishments, inputValue.trim()]);
+                setInputValue("");
+            };
+
+            const removePunishment = (index) => {
+                const newList = punishments.filter((_, i) => i !== index);
+                setPunishments(newList);
+            };
+
+            return (
+                <div class="max-w-md mx-auto p-6 flex flex-col items-center min-h-screen">
+                    <h1 class="text-4xl font-black text-red-600 mb-8 tracking-tighter uppercase italic text-center">Punishment Roulette</h1>
+                    
+                    <div class="w-full bg-slate-800 rounded-2xl p-8 mb-8 border-4 border-red-900 shadow-2xl text-center min-h-[200px] flex items-center justify-center">
+                        {isRolling ? (
+                            <div class="animate-spin text-5xl">💀</div>
+                        ) : result ? (
+                            <div class="animate__animated animate__jackInTheBox">
+                                <p class="text-slate-400 uppercase text-xs font-bold mb-2 text-center">The Fate is Sealed:</p>
+                                <p class="text-2xl font-bold text-red-400">{result}</p>
+                            </div>
+                        ) : (
+                            <p class="text-slate-500 italic text-center">Ready to spin?</p>
+                        )}
+                    </div>
+
+                    <button 
+                        onClick={rollRoulette}
+                        disabled={isRolling}
+                        class="w-full bg-red-600 hover:bg-red-700 active:scale-95 transition-all text-white font-black py-4 rounded-xl text-xl shadow-lg mb-10 uppercase"
+                    >
+                        {isRolling ? "Deciding..." : "Spin the Wheel"}
+                    </button>
+
+                    <div class="w-full">
+                        <h2 class="text-xl font-bold mb-4 border-b border-slate-700 pb-2 flex justify-between items-center">
+                            <span>Punishments</span>
+                            <button onClick={resetList} class="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded uppercase tracking-widest">Reset Defaults</button>
+                        </h2>
+                        
+                        <form onSubmit={addPunishment} class="flex gap-2 mb-6">
+                            <input 
+                                type="text" 
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                placeholder="Add custom penalty..."
+                                class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-2 focus:outline-none focus:border-red-500 text-white"
+                            />
+                            <button class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg font-bold transition-colors">+</button>
+                        </form>
+
+                        <div class="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            {punishments.map((item, index) => (
+                                <div key={index} class="flex justify-between items-center bg-slate-800/50 p-3 rounded-lg border border-slate-700 group hover:border-red-900 transition-colors">
+                                    <span class="text-sm">{item}</span>
+                                    <button onClick={() => removePunishment(index)} class="text-slate-500 hover:text-red-500 font-bold ml-2 p-1">✕</button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PunishmentApp />);
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 10px; }
+    </style>
+</body>
+</html>
